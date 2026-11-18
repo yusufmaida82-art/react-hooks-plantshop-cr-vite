@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 function PlantCard({ plant }) {
   // Tracks whether this plant is marked as sold out

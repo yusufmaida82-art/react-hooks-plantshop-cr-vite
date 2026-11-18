@@ -12,13 +12,30 @@ function PlantPage() {
   // Fetch every plant once, when the page first loads
   useEffect(() => {
     fetch("http://localhost:6001/plants")
-      .then((r) => r.json())
-      .then((data) => setPlants(data));
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Could not load plants");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const loadedPlants = Array.isArray(data) ? data : [];
+        setPlants((currentPlants) => {
+          const loadedIds = new Set(loadedPlants.map((plant) => plant.id));
+          return [
+            ...loadedPlants,
+            ...currentPlants.filter((plant) => !loadedIds.has(plant.id)),
+          ];
+        });
+      })
+      .catch((error) => {
+        console.error("Failed to load plants:", error);
+      });
   }, []);
 
   // Add a newly created plant to state so it renders immediately
   function handleAddPlant(newPlant) {
-    setPlants([...plants, newPlant]);
+    setPlants((currentPlants) => [...currentPlants, newPlant]);
   }
 
   // Show only plants whose name includes the search text

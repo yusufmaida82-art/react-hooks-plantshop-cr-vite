@@ -6,23 +6,29 @@ function NewPlantForm({ onAddPlant }) {
   const [price, setPrice] = useState("");
 
   // POST the new plant to the backend, then add it to state
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
-   const newPlant = { name, image, price };
+    const newPlant = { name, image, price };
 
-    fetch("http://localhost:6001/plants", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newPlant),
-    })
-      .then((r) => r.json())
-      .then((savedPlant) => {
-        onAddPlant(savedPlant);
-        setName("");
-        setImage("");
-        setPrice("");
+    try {
+      const response = await fetch("http://localhost:6001/plants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPlant),
       });
+      if (!response.ok) {
+        throw new Error("Could not add plant");
+      }
+
+      const savedPlant = await response.json();
+      onAddPlant(savedPlant);
+      setName("");
+      setImage("");
+      setPrice("");
+    } catch (error) {
+      console.error("Failed to add plant:", error);
+    }
   }
 
   return (
@@ -47,6 +53,7 @@ function NewPlantForm({ onAddPlant }) {
           type="number"
           name="price"
           step="0.01"
+          min="0"
           placeholder="Price"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
